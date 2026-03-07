@@ -1,18 +1,20 @@
-# applescripts — Claude Notes
+# AppleScripts - Claude Notes
 
 ## Overview
-TODO: Add project overview.
+Apple Music automation suite. 25+ AppleScript commands, Auto-DJ daemon, playlist management, rating engine. 4800 LOC.
 
-## Dev
+## Run
 ```bash
 cd ~/Documents/Code/applescripts
-# add dev command
+osascript <script-name>.scpt
 ```
 
-## Deploy
-```bash
-git push origin main
-```
+## Features
+- Auto-DJ daemon: background track queueing by mood/genre
+- Playlist CRUD operations
+- Track rating and grading engine
+- macOS Shortcuts integration
+- Library search and metadata management
 
 ## Status
-In development.
+v1.0.0 -- Stable, actively used.
