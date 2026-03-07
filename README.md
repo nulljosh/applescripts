@@ -21,3 +21,12 @@ osascript <script-name>.scpt
 ## License
 
 MIT (c) 2026 Joshua Trommel
+
+## Roadmap
+
+- [ ] Playlist sync across devices
+- [ ] Smart queue (tempo/energy-aware Auto-DJ)
+- [ ] Genre detection from listening history
+- [ ] Shortcuts integration (Siri triggers)
+- [ ] Rating-based smart playlists
+- [ ] Play count analytics dashboard
