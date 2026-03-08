@@ -18,3 +18,9 @@ osascript <script-name>.scpt
 
 ## Status
 v1.0.0 -- Stable, actively used.
+
+## Quick Commands
+- `./scripts/simplify.sh`
+- `./scripts/monetize.sh . --write`
+- `./scripts/audit.sh .`
+- `./scripts/ship.sh .`
