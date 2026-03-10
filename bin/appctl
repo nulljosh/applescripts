@@ -21,7 +21,7 @@ Commands:
   pid <app>         Get PID of running application
   windows [app]     List windows (all or for specific app)
 EOF
-  exit 1
+  exit 2
 }
 
 [[ $# -lt 1 ]] && usage

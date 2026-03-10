@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")" && pwd)"
 MAC_BIN="$SCRIPT_DIR/mac"
 BUILTIN_WORKFLOW_DIR="$SCRIPT_DIR/../workflows"
 USER_WORKFLOW_DIR="${HOME}/.local/share/macflow/workflows"

@@ -26,11 +26,11 @@ shift
 
 case "$cmd" in
   top)
-    ps aux --sort=-%cpu | head -11
+    ps -eo pid,pcpu,pmem,comm -r | head -11
     ;;
 
   top-mem)
-    ps aux --sort=-%mem | head -11
+    ps -eo pid,pcpu,pmem,comm -m | head -11
     ;;
 
   find)

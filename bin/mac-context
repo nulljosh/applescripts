@@ -24,6 +24,7 @@ case "$cmd" in
   save)
     [[ $# -lt 1 ]] && { echo "Usage: mac-context save <name>"; exit 1; }
     name="$1"
+    [[ "$name" == */* || "$name" == ..* ]] && { echo "Invalid context name: $name"; exit 1; }
     file="$CTX_DIR/$name"
     {
       echo "# Context: $name"
@@ -71,6 +72,7 @@ end tell' 2>/dev/null || echo "stopped"
   restore)
     [[ $# -lt 1 ]] && { echo "Usage: mac-context restore <name>"; exit 1; }
     name="$1"
+    [[ "$name" == */* || "$name" == ..* ]] && { echo "Invalid context name: $name"; exit 1; }
     file="$CTX_DIR/$name"
     [[ ! -f "$file" ]] && { echo "Context not found: $name"; exit 1; }
 

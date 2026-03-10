@@ -21,7 +21,7 @@ Commands:
   clear             Clear the clipboard
   count             Character/word/line count of clipboard
 EOF
-  exit 1
+  exit 2
 }
 
 ensure_history_dir() {

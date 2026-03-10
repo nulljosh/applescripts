@@ -27,7 +27,7 @@ Commands:
   swap              Swap positions of two frontmost windows
   restore           Restore windows from last saved state
 EOF
-  exit 1
+  exit 2
 }
 
 [[ $# -lt 1 ]] && usage

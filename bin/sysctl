@@ -29,7 +29,7 @@ Commands:
   trash             Show Trash size
   hostname [name]   Get or set hostname
 EOF
-  exit 1
+  exit 2
 }
 
 [[ $# -lt 1 ]] && usage

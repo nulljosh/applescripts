@@ -19,7 +19,7 @@ Commands:
   eject [name]      Eject a volume (or list mounted volumes)
   info <path>       Get file/folder info
 EOF
-  exit 1
+  exit 2
 }
 
 [[ $# -lt 1 ]] && usage

@@ -45,14 +45,9 @@ case "$cmd" in
 
   speed)
     echo "Testing download speed (10MB from Cloudflare CDN)..."
-    url="https://speed.cloudflare.com/__down?bytes=10000000"
-    start=$(date +%s%N)
-    curl -s -o /dev/null "$url"
-    end=$(date +%s%N)
-    elapsed_ms=$(( (end - start) / 1000000 ))
-    mbps=$(echo "scale=2; (10 * 8 * 1000) / $elapsed_ms" | bc)
-    echo "Downloaded 10MB in ${elapsed_ms}ms"
-    echo "Speed: ${mbps} Mbps"
+    speed_bytes=$(curl -so /dev/null -w '%{speed_download}' "https://speed.cloudflare.com/__down?bytes=10000000" 2>/dev/null)
+    speed_mbps=$(echo "scale=2; $speed_bytes * 8 / 1000000" | bc 2>/dev/null)
+    echo "Download: ${speed_mbps} Mbps"
     ;;
 
   ports)

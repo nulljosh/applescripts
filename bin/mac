@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 set -eo pipefail
 
 VERSION="2.0.0"
@@ -62,8 +62,10 @@ case "$cmd" in
     exit 0
     ;;
   status)
-    echo "status command coming soon"
-    exit 0
+    exec "$SCRIPT_DIR/mac-status" "$@"
+    ;;
+  context)
+    exec "$SCRIPT_DIR/mac-context" "$@"
     ;;
 esac
 
