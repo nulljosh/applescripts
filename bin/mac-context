@@ -1,0 +1,278 @@
+#!/bin/bash
+# mac-context -- Snapshot and restore desktop context
+# Usage: mac-context <save|restore|list|delete> [name]
+
+set -euo pipefail
+
+CONTEXT_DIR="${HOME}/.local/share/mac/contexts"
+mkdir -p "$CONTEXT_DIR"
+
+usage() {
+  cat <<'EOF'
+Usage: mac-context <command> [name]
+
+Commands:
+  save <name>     Save current desktop state
+  restore <name>  Restore a saved context
+  list            List all saved contexts
+  delete <name>   Delete a saved context
+EOF
+  exit 1
+}
+
+[[ $# -lt 1 ]] && usage
+
+cmd="$1"
+name="${2:-}"
+
+context_path() {
+  echo "${CONTEXT_DIR}/${1}.ctx"
+}
+
+# ── save ──────────────────────────────────────────────────────────────────────
+do_save() {
+  [[ -z "$name" ]] && { echo "Error: save requires a name" >&2; exit 1; }
+  local path
+  path=$(context_path "$name")
+
+  echo "Saving context '${name}'..."
+
+  {
+    echo "# mac-context snapshot"
+    echo "name=${name}"
+    echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo ""
+
+    # Running apps (non-background)
+    echo "[apps]"
+    osascript <<'ASEOF' 2>/dev/null || true
+tell application "System Events"
+  set appList to {}
+  repeat with proc in (every application process whose background only is false)
+    set appList to appList & {name of proc}
+  end repeat
+  set output to ""
+  repeat with a in appList
+    set output to output & a & linefeed
+  end repeat
+  return output
+end tell
+ASEOF
+    echo ""
+
+    # Window positions
+    echo "[windows]"
+    osascript <<'ASEOF' 2>/dev/null || true
+tell application "System Events"
+  repeat with proc in (every application process whose background only is false)
+    set appName to name of proc
+    try
+      repeat with w in (every window of proc)
+        set {x, y} to position of w
+        set {ww, wh} to size of w
+        set wn to name of w
+        log appName & "|" & wn & "|" & x & "|" & y & "|" & ww & "|" & wh
+      end repeat
+    end try
+  end repeat
+end tell
+ASEOF
+    echo ""
+
+    # Music state
+    echo "[music]"
+    osascript <<'ASEOF' 2>/dev/null || echo "state=not_running"
+tell application "Music"
+  if it is running then
+    set ps to player state as string
+    set vol to sound volume
+    set sh to shuffle enabled
+    try
+      set t to current track
+      set tn to name of t
+      set ta to artist of t
+      set tal to album of t
+      return "state=" & ps & linefeed & "track=" & tn & linefeed & "artist=" & ta & linefeed & "album=" & tal & linefeed & "volume=" & vol & linefeed & "shuffle=" & sh
+    on error
+      return "state=" & ps & linefeed & "volume=" & vol & linefeed & "shuffle=" & sh
+    end try
+  else
+    return "state=not_running"
+  end if
+end tell
+ASEOF
+    echo ""
+
+    # System settings
+    echo "[system]"
+    local dark vol_level
+    dark=$(osascript -e 'tell application "System Events" to tell appearance preferences to return dark mode' 2>/dev/null || echo "false")
+    vol_level=$(osascript -e 'output volume of (get volume settings)' 2>/dev/null || echo "50")
+    echo "dark_mode=${dark}"
+    echo "volume=${vol_level}"
+
+  } > "$path"
+
+  echo "Saved to ${path}"
+}
+
+# ── restore ───────────────────────────────────────────────────────────────────
+do_restore() {
+  [[ -z "$name" ]] && { echo "Error: restore requires a name" >&2; exit 1; }
+  local path
+  path=$(context_path "$name")
+  [[ ! -f "$path" ]] && { echo "Error: context '${name}' not found" >&2; exit 1; }
+
+  echo "Restoring context '${name}'..."
+
+  local section=""
+  local apps=()
+  local music_state="" music_track="" music_artist="" music_album="" music_vol="" music_shuffle=""
+  local sys_dark="" sys_vol=""
+
+  # Parse the context file
+  while IFS= read -r line; do
+    # Skip comments and blank lines
+    [[ "$line" =~ ^# ]] && continue
+    [[ -z "$line" ]] && continue
+
+    # Section headers
+    if [[ "$line" =~ ^\[(.+)\]$ ]]; then
+      section="${BASH_REMATCH[1]}"
+      continue
+    fi
+
+    case "$section" in
+      apps)
+        [[ -n "$line" ]] && apps+=("$line")
+        ;;
+      music)
+        case "${line%%=*}" in
+          state)   music_state="${line#*=}" ;;
+          track)   music_track="${line#*=}" ;;
+          artist)  music_artist="${line#*=}" ;;
+          album)   music_album="${line#*=}" ;;
+          volume)  music_vol="${line#*=}" ;;
+          shuffle) music_shuffle="${line#*=}" ;;
+        esac
+        ;;
+      system)
+        case "${line%%=*}" in
+          dark_mode) sys_dark="${line#*=}" ;;
+          volume)    sys_vol="${line#*=}" ;;
+        esac
+        ;;
+    esac
+  done < "$path"
+
+  # Restore apps
+  if [[ ${#apps[@]} -gt 0 ]]; then
+    echo "Opening apps..."
+    for app in "${apps[@]}"; do
+      osascript -e "tell application \"${app}\" to activate" 2>/dev/null || true
+    done
+    sleep 1
+  fi
+
+  # Restore window positions
+  echo "Restoring windows..."
+  local win_lines=()
+  local in_windows=false
+  while IFS= read -r line; do
+    [[ "$line" == "[windows]" ]] && { in_windows=true; continue; }
+    [[ "$line" =~ ^\[.+\]$ ]] && { in_windows=false; continue; }
+    $in_windows && [[ -n "$line" ]] && win_lines+=("$line")
+  done < "$path"
+
+  for wline in "${win_lines[@]}"; do
+    IFS='|' read -r app_name win_name wx wy ww wh <<< "$wline"
+    osascript <<ASEOF 2>/dev/null || true
+tell application "System Events"
+  try
+    tell application process "${app_name}"
+      repeat with w in every window
+        if name of w is "${win_name}" then
+          set position of w to {${wx}, ${wy}}
+          set size of w to {${ww}, ${wh}}
+        end if
+      end repeat
+    end tell
+  end try
+end tell
+ASEOF
+  done
+
+  # Restore system settings
+  if [[ -n "$sys_dark" ]]; then
+    echo "Restoring system settings..."
+    osascript -e "tell application \"System Events\" to tell appearance preferences to set dark mode to ${sys_dark}" 2>/dev/null || true
+  fi
+  if [[ -n "$sys_vol" ]]; then
+    osascript -e "set volume output volume ${sys_vol}" 2>/dev/null || true
+  fi
+
+  # Restore music state
+  if [[ -n "$music_state" && "$music_state" != "not_running" ]]; then
+    echo "Restoring music state..."
+    if [[ -n "$music_vol" ]]; then
+      osascript -e "tell application \"Music\" to set sound volume to ${music_vol}" 2>/dev/null || true
+    fi
+    if [[ -n "$music_shuffle" ]]; then
+      osascript -e "tell application \"Music\" to set shuffle enabled to ${music_shuffle}" 2>/dev/null || true
+    fi
+    if [[ -n "$music_track" && -n "$music_artist" ]]; then
+      osascript <<ASEOF 2>/dev/null || true
+tell application "Music"
+  try
+    set results to (search library playlist 1 for "${music_track}")
+    repeat with t in results
+      if artist of t is "${music_artist}" then
+        play t
+        exit repeat
+      end if
+    end repeat
+  end try
+end tell
+ASEOF
+      if [[ "$music_state" == "paused" ]]; then
+        sleep 1
+        osascript -e 'tell application "Music" to pause' 2>/dev/null || true
+      fi
+    fi
+  fi
+
+  echo "Context '${name}' restored."
+}
+
+# ── list ──────────────────────────────────────────────────────────────────────
+do_list() {
+  local files
+  files=$(ls -1 "${CONTEXT_DIR}"/*.ctx 2>/dev/null) || { echo "No saved contexts."; return; }
+  echo "Saved contexts:"
+  while IFS= read -r f; do
+    local ctx_name
+    ctx_name=$(basename "$f" .ctx)
+    local date_val
+    date_val=$(grep '^date=' "$f" 2>/dev/null | head -1 | cut -d= -f2 || echo "unknown")
+    printf "  %-20s  %s\n" "$ctx_name" "$date_val"
+  done <<< "$files"
+}
+
+# ── delete ────────────────────────────────────────────────────────────────────
+do_delete() {
+  [[ -z "$name" ]] && { echo "Error: delete requires a name" >&2; exit 1; }
+  local path
+  path=$(context_path "$name")
+  [[ ! -f "$path" ]] && { echo "Error: context '${name}' not found" >&2; exit 1; }
+  rm "$path"
+  echo "Deleted context '${name}'."
+}
+
+# ── dispatch ──────────────────────────────────────────────────────────────────
+case "$cmd" in
+  save)    do_save ;;
+  restore) do_restore ;;
+  list)    do_list ;;
+  delete)  do_delete ;;
+  *)       usage ;;
+esac
