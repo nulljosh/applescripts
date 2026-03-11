@@ -2,11 +2,12 @@
 set -euo pipefail
 
 BASE="$HOME/Documents/Code/applescripts"
-LOG="$BASE/logs/auto-dj.log"
+CACHE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/applescripts"
+LOG="$CACHE_DIR/auto-dj.log"
 DB="$HOME/.local/share/musicctl/history.db"
 MOOD_FILE="$BASE/logs/dj.mood"
 
-mkdir -p "$(dirname "$LOG")" "$(dirname "$DB")"
+mkdir -p "$CACHE_DIR" "$(dirname "$DB")"
 
 # Init SQLite
 sqlite3 "$DB" "CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY, track TEXT, artist TEXT, genre TEXT, played_at DATETIME DEFAULT CURRENT_TIMESTAMP);"

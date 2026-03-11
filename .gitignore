@@ -36,3 +36,8 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Runtime logs
+logs/auto-dj.log
+logs/launchd.err.log
+logs/launchd.out.log
