@@ -71,10 +71,7 @@ async function main(): Promise<void> {
     // Save or print
     if (options.integrate) {
       // Auto-integrate: save to design-tokens.css and apply to all projects
-      const tokensPath = path.join(
-        process.env.HOME || '/root',
-        'Documents/Code/nulljosh.github.io/design-tokens.css'
-      );
+      const tokensPath = process.env.VIBE_TOKENS_PATH || path.join(process.env.HOME || '/root', 'Documents/Code/nulljosh.github.io/design-tokens.css');
       await fs.writeFile(tokensPath, output, 'utf8');
       console.log(chalk.green(`\nSaved to ${tokensPath}\n`));
 
