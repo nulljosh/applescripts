@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Vibe -- Extract Design Tokens from Any Website</title>
+  <meta name="description" content="Scrapes websites with Puppeteer, analyzes colors, fonts, and spacing, then outputs CSS variables, Tailwind config, or JSON.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<button class="theme-toggle" aria-label="Toggle theme">
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<main id="main">
+
+<!-- Hero -->
+<header class="hero container">
+  <span class="version animate__animated animate__fadeIn">v2.1.0</span>
+  <h1 class="animate__animated animate__fadeInUp">Vibe</h1>
+  <p class="animate__animated animate__fadeInUp animate__delay-1s">Extract design tokens from any website. Scrapes with Puppeteer, analyzes colors, fonts, and spacing, then outputs CSS variables, Tailwind config, or JSON.</p>
+  <ul class="links animate__animated animate__fadeInUp animate__delay-1s">
+    <li><a class="pill" href="https://github.com/nulljosh/vibe">GitHub</a></li>
+  </ul>
+</header>
+
+<!-- Features -->
+<section data-aos="fade-up">
+  <div class="container">
+    <h2>Features</h2>
+    <ul class="items">
+      <li>
+        <h3>Puppeteer Scraping</h3>
+        <p>Launches a headless browser, navigates to any URL, and captures the full computed style tree.</p>
+      </li>
+      <li>
+        <h3>Color Clustering</h3>
+        <p>Groups extracted colors by similarity, identifies primary, secondary, and accent palettes automatically.</p>
+      </li>
+      <li>
+        <h3>Dark Mode Detection</h3>
+        <p>Detects prefers-color-scheme media queries and extracts both light and dark token sets.</p>
+      </li>
+      <li>
+        <h3>Typography Extraction</h3>
+        <p>Pulls font families, weights, sizes, and line heights from headings, body text, and UI elements.</p>
+      </li>
+      <li>
+        <h3>Multiple Output Formats</h3>
+        <p>Exports as CSS custom properties, Tailwind config, or raw JSON. Pipe into any design workflow.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Architecture -->
+<section data-aos="fade-up">
+  <div class="container">
+    <h2>Architecture</h2>
+    <div class="arch-block">
+<pre>src/
+  <span class="file">index.ts</span>          <span class="desc">CLI entry point, Commander.js setup</span>
+  <span class="file">scraper.ts</span>        <span class="desc">Puppeteer page navigation + style capture</span>
+  <span class="file">analyzer.ts</span>       <span class="desc">Color clustering, typography grouping, spacing analysis</span>
+  <span class="file">formatter.ts</span>      <span class="desc">Output rendering (CSS vars, Tailwind, JSON)</span>
+
+__tests__/
+  <span class="file">scraper.test.ts</span>   <span class="desc">Scraping integration tests</span>
+  <span class="file">analyzer.test.ts</span>  <span class="desc">Token analysis unit tests</span>
+  <span class="file">formatter.test.ts</span> <span class="desc">Output format verification</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Roadmap -->
+<section data-aos="fade-up">
+  <div class="container">
+    <h2>Roadmap</h2>
+    <ul class="roadmap">
+      <li class="current">v2.1.0 -- Token Extraction <span>(current)</span></li>
+      <li>Figma Export <span>(design token to Figma variables)</span></li>
+      <li>Animation Extraction <span>(keyframes, transitions, timing functions)</span></li>
+      <li>Batch URLs <span>(process multiple sites in one run)</span></li>
+      <li>Browser Extension <span>(extract tokens from current tab)</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section data-aos="fade-up">
+  <div class="container">
+    <h2>Tech Stack</h2>
+    <ul class="tech-list">
+      <li class="pill">TypeScript</li>
+      <li class="pill">Puppeteer</li>
+      <li class="pill">Commander.js</li>
+      <li class="pill">tinycolor2</li>
+      <li class="pill">Jest</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>MIT 2026 Joshua Trommel</p>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+AOS.init({duration:700,once:true,easing:'ease-out-cubic',offset:40});
+
+(function(){
+  var t=document.querySelector('.theme-toggle');
+  var meta=document.querySelector('meta[name="theme-color"]');
+  function set(theme){
+    document.documentElement.setAttribute('data-theme',theme);
+    localStorage.setItem('theme',theme);
+    if(meta)meta.setAttribute('content',theme==='dark'?'#09090b':'#ffffff');
+  }
+  var saved=localStorage.getItem('theme');
+  if(saved){set(saved)}
+  else if(window.matchMedia('(prefers-color-scheme:dark)').matches){set('dark')}
+  t.addEventListener('click',function(){
+    var current=document.documentElement.getAttribute('data-theme');
+    set(current==='dark'?'light':'dark');
+  });
+})();
+</script>
+</body>
+</html>
